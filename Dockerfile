@@ -1,21 +1,21 @@
-# Build the manager binary
-FROM golang:1.17 as builder
+# # Build the manager binary
+# FROM golang:1.17 as builder
 
-WORKDIR /workspace
+# WORKDIR /workspace
 
-# Dependencies are cached unless we change go.mod or go.sum
-COPY go.mod go.mod
-COPY go.sum go.sum
-RUN go mod download
+# # Dependencies are cached unless we change go.mod or go.sum
+# COPY go.mod go.mod
+# COPY go.sum go.sum
+# RUN go mod download
 
-# Copy the go source
-COPY main.go main.go
-COPY api/ api/
-COPY controllers/ controllers/
-COPY internal/ internal/
+# # Copy the go source
+# COPY main.go main.go
+# COPY api/ api/
+# COPY controllers/ controllers/
+# COPY internal/ internal/
 
-# Build
-RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -tags timetzdata -o manager main.go
+# # Build
+# RUN CGO_ENABLED=0 GOOS=linux GOARCH=amd64 GO111MODULE=on go build -a -tags timetzdata -o manager main.go
 
 # ---------------------------------------
 FROM alpine:latest as etc-builder
@@ -32,9 +32,10 @@ ARG GIT_COMMIT
 LABEL GitCommit=$GIT_COMMIT
 
 WORKDIR /
-COPY --from=builder /workspace/manager .
+#COPY --from=builder /workspace/manager .
 COPY --from=etc-builder /etc/passwd /etc/group /etc/
 COPY --from=etc-builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ca-certificates.crt
+COPY cluster-operator /manager
 
 USER 1000:1000
 
